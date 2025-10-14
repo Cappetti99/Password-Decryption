@@ -7,7 +7,7 @@
 
 int main() {
     std::string password = "26122000";
-    std::string salt = "AB";  // DES salt: primi 2 char
+    const std::string salt = "AB";  // DES salt: primi 2 char
 
     char* hash = crypt(password.c_str(), salt.c_str());
     if (!hash) {

@@ -6,24 +6,34 @@
 
 int main() {
     std::string password = "27122000";
-    std::string salt = "AB";  // DES salt: primi 2 char
+    const std::string salt = "AB";  // DES salt: primi 2 char
 
     char* hash = crypt(password.c_str(), salt.c_str());
-    std::string passHash = hash;
+
     if (!hash) {
         std::cerr << "crypt() failed\n";
         return 1;
     }
+    const std::string target = hash;
     std::string found;
     auto start = std::chrono::high_resolution_clock::now();
         for (int a = 0; a <= 31; ++a) {
             for (int b = 0; b <= 12; ++b) {
                 for (int c = 0; c <= 2025; ++c) {
+
                     char date[9];
-                    std::snprintf(date, 9, "%02d%02d%04d", a, b, c);
-                    std::string s(date);
-                    char* h = crypt(s.c_str(), salt.c_str());
-                    if (strcmp(h, passHash.c_str()) == 0) {
+                    date[0] = char('0' + (a / 10));
+                    date[1] = char('0' + (a % 10));
+                    date[2] = char('0' + (b / 10));
+                    date[3] = char('0' + (b % 10));
+                    int y = c;
+                    date[4] = char('0' + ((y / 1000) % 10));
+                    date[5] = char('0' + ((y / 100) % 10));
+                    date[6] = char('0' + ((y / 10) % 10));
+                    date[7] = char('0' + (y % 10));
+                    date[8] = '\0';
+                    char* h = crypt(date, salt.c_str());
+                    if (strcmp(h,target.c_str()) == 0) {
                         {
                             if (found.empty()) {
                                 found = date;
