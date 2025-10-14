@@ -96,6 +96,7 @@ int main(int argc, char* argv[]) {
     const char* salt_cstr = salt.c_str(); // OTTIMIZZAZIONE: calcola una volta sola
     std::string found;
     std::atomic<bool> found_flag(false);
+    bool correct=true;
 
     static std::random_device rd;
     static std::mt19937 gen(rd());
@@ -133,11 +134,12 @@ int main(int argc, char* argv[]) {
         target_password[6] = '0' + ((y / 10) % 10);
         target_password[7] = '0' + (y % 10);
         target_password[8] = '\0';
-        
+
         const char* target = crypt(target_password, salt_cstr);
-        
+
 #pragma omp parallel default(none) shared(salt_cstr,found,target,found_flag)
     {
+        //printf("Thread %d in esecuzione\n", omp_get_thread_num());
         struct crypt_data data{};
         data.initialized = 0;
 
@@ -218,6 +220,11 @@ int main(int argc, char* argv[]) {
         printf("✗ Password non trovata\n");
     }
     std::cout << "========================================\n";
+    if (correct) {
+        std::cout << "✓ Tutte le password generate sono corrette\n";
+    } else {
+        std::cout << "✗ Alcune password generate non sono corrette\n";
+    }
 
     return 0;
 }
