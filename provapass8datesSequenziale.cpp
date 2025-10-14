@@ -14,7 +14,7 @@ int main() {
         std::cerr << "crypt() failed\n";
         return 1;
     }
-    std::string found = "";
+    std::string found;
     auto start = std::chrono::high_resolution_clock::now();
         for (int a = 0; a <= 31; ++a) {
             for (int b = 0; b <= 12; ++b) {

@@ -1,3 +1,4 @@
+#include <chrono>
 #include <crypt.h>
 #include <iostream>
 #include <string>
@@ -13,16 +14,16 @@ int main() {
         std::cerr << "crypt() failed\n";
         return 1;
     }
-    std::string found = "";
+    std::string found;
 
     //std::string chars = "0123456789";
     //int C = (int)chars.size();
     //printf("C = %d\n", C);
-    double start = omp_get_wtime();
+    auto start = std::chrono::high_resolution_clock::now();
 
 #pragma omp parallel
     {
-        printf("Thread %d in esecuzione\n", omp_get_thread_num());
+        //printf("Thread %d in esecuzione\n", omp_get_thread_num());
         struct crypt_data data;
         data.initialized = 0;
 
@@ -48,8 +49,9 @@ int main() {
             }
         }
     }
-    double end= omp_get_wtime();
-    printf("Tempo finale=%f\n", end-start);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+    std::cout << "Tempo impiegato: " << elapsed.count() << " secondi\n";
     if (!found.empty()) {
         printf("Pass finale: %s\n", found.c_str());
     } else {
