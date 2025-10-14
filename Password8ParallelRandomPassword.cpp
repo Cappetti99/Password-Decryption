@@ -85,6 +85,7 @@ int main(int argc, char* argv[]) {
     const std::string salt = "AB";  // DES salt: primi 2 char
     std::string found;
     std::atomic<bool> found_flag(false);
+    bool correct=true;
 
     static std::random_device rd;
     static std::mt19937 gen(rd());
@@ -179,11 +180,13 @@ int main(int argc, char* argv[]) {
         } // fine loop giorno
     } // fine parallel
         found_flag.store(false, std::memory_order_release);  // IMPORTANT set flag to true
-
+        if (found.empty()) {
+            correct=false;
+        }
         // Aggiorna la barra di progresso
         auto current_time = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed_so_far = current_time - start;
-        printProgressBar(i + 1, NUM_ITER, elapsed_so_far.count());
+        //printProgressBar(i + 1, NUM_ITER, elapsed_so_far.count());
 }
 
     std::cout << "\n\n";  // Nuova riga dopo la barra di progresso
@@ -208,6 +211,11 @@ int main(int argc, char* argv[]) {
         printf("✗ Password non trovata\n");
     }
     std::cout << "========================================\n";
+    if (correct) {
+        std::cout << "✓ Tutte le password generate sono corrette\n";
+    } else {
+        std::cout << "✗ Alcune password generate non sono corrette\n";
+    }
 
     return 0;
 }
