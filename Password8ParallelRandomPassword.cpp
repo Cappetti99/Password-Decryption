@@ -41,6 +41,8 @@ void printProgressBar(int current, int total, double elapsed_time, long long pas
 
 
 int main(int argc, char* argv[]) {
+
+
     ////////////////////////////////////////////////////
     ///                 CREAZIONE HASH PASSWORD      ///
     ////////////////////////////////////////////////////
@@ -107,12 +109,13 @@ int main(int argc, char* argv[]) {
     ///                 INIZIO ITERAZIONI            ///
     ////////////////////////////////////////////////////
     constexpr int NUM_ITER=100;
-    constexpr long long PASSWORDS_PER_ITER = 32LL * 13 * 2026; // (0-31) * (0-12) * (0-2025)
+    constexpr long long PASSWORDS_PER_ITER = 32LL * 13 * 2026; // (0-31) * (0-12) * (0-2025) //TODO fix this
     long long total_passwords_tested = 0;
 
     std::cout << "Progresso elaborazione:\n";
 
     for (int i=0;i<NUM_ITER;i++) {
+        int numberIter=0;
         found=""; // IMPORTANT reset found per loop successivo
         found_flag.store(false, std::memory_order_release); // Reset flag all'inizio
 
@@ -139,20 +142,25 @@ int main(int argc, char* argv[]) {
 
         const char* target = crypt(target_password, salt_cstr);
 
-#pragma omp parallel default(none) shared(salt_cstr,found,target,found_flag)
+#pragma omp parallel default(none) shared(salt_cstr,found,target,found_flag) firstprivate(numberIter) reduction(+:total_passwords_tested)
     {
         //printf("Thread %d in esecuzione\n", omp_get_thread_num());
         struct crypt_data data{};
         data.initialized = 0;
 
-#pragma omp for collapse(3) schedule(static) nowait
+#pragma omp for collapse(3) schedule(static) //nowait
         for (int a = 0; a <= 31; ++a) {
             for (int b = 0; b <= 12; ++b) {
                 for (int c = 0; c <= 2025; ++c) {
+
+                    #pragma omp cancellation point for ////////IMPORTANT mettere cancellation velocizza
                     // Early stop: controlla flag
                     if (found_flag.load(std::memory_order_relaxed)) { // se mettiamo il crontroolo con c % 1000 rallenta
+                        #pragma omp cancel for     ////////IMPORTANT mettere cancellation point velocizza
                         continue; // Salta questa iterazione, OpenMP gestirà l'uscita
+
                     }
+                    numberIter ++;
 
                     // GENERAZIONE PASSWORD ITERATIVA
                     char date[9];
@@ -184,9 +192,11 @@ int main(int argc, char* argv[]) {
                 } // fine loop anno
             } // fine loop mese
         } // fine loop giorno
+            //printf("numero Iterazioni thread=%d \n",numberIter);
+            total_passwords_tested+=numberIter;
     } // fine parallel
 
-        total_passwords_tested += PASSWORDS_PER_ITER;
+        //total_passwords_tested += PASSWORDS_PER_ITER;
 
         // Aggiorna la barra di progresso solo ogni 5 iterazioni (o all'ultima)
         if ((i + 1) % 5 == 0 || i == NUM_ITER - 1) {
