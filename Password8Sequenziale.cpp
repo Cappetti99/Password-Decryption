@@ -56,10 +56,6 @@ int main() {
     std::mt19937 gen(rd());
     const auto start = std::chrono::high_resolution_clock::now();
 
-    // Inizializzazione crypt_data per crypt_r
-    struct crypt_data data{};
-    data.initialized = 0;
-
     ////////////////////////////////////////////////////
     ///                 INIZIO ITERAZIONI            ///
     ////////////////////////////////////////////////////
@@ -97,6 +93,7 @@ int main() {
         target_password[8] = '\0';
 
         const char* target = crypt(target_password, salt_cstr);
+        const std::string target_string = target;
 
         // Loop sequenziale di brute force
         for (int a = 0; a <= 31 && !found_flag; ++a) {
@@ -120,11 +117,11 @@ int main() {
                     date[8] = '\0';
 
                     // CONTROLLO PASSWORD
-                    const char* h = crypt_r(date, salt_cstr, &data);
+                    const char* h = crypt(date, salt_cstr);
 
                     // Ottimizzazione: Quick reject - confronta prima i primi 2 caratteri
                     if (h[2] == target[2] && h[3] == target[3]) {
-                        if (strcmp(h, target) == 0) {
+                        if (strcmp(h, target_string.c_str()) == 0) {
                             found = date;
                             found_flag = true;
                             break;
