@@ -196,7 +196,7 @@ for each random target password:
 
 ### 1. Clone the Repository
 ```bash
-git clone <repository-url>
+git clone <[repository-url](https://github.com/Cappetti99)>
 cd Password-Decryption
 ```
 
@@ -346,8 +346,6 @@ Password-Decryption/
 ├── Password8ParallelRandomPasswordNOWAIT.cpp   # Parallel NOWAIT version
 │
 ├── parallel_password_report.tex                # Technical report (LaTeX)
-├── beamerthemesintef.sty                       # Presentation theme
-├── sintefcolor.sty                             # Color definitions
 │
 ├── cmake-build-debug/                          # Build artifacts
 │   ├── Password8Sequenziale                    # Sequential binary
@@ -358,8 +356,6 @@ Password-Decryption/
 │   ├── benchmark_*.csv                         # Raw data
 │   └── benchmark_*_[plot_type].png            # Visualizations
 │
-├── assets/                                     # Presentation assets
-└── unifi_latex_overleaf/                      # Presentation template
 ```
 
 ## 🔧 Technical Details
