@@ -1,27 +1,45 @@
 cmake_minimum_required(VERSION 3.12)
-project(openmp-hello-world)
+project(Password-Decryption)
 
 set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Trova OpenMP
+find_package(OpenMP REQUIRED)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -O3 -march=native -ffast-math")
-set(ENV{OMP_CANCELLATION} "TRUE")
+# Flags di ottimizzazione
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -ffast-math -DNDEBUG")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
-set(SOURCE_FILES)
+# Set default build type to Release if not specified
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
+endif()
 
-add_executable(provapass8 provapass8.cpp)
-add_executable(provapass8sequenziale provapass8sequenziale.cpp)
-add_executable(provapass8datesequenziale provapass8datesSequenziale.cpp)
-add_executable(Password8ParallelProvaOPT Password8ParallelProvaOPT.cpp)
-add_executable(provapass8date provapass8dates.cpp)
+# Executables (solo i file che esistono realmente)
 add_executable(Password8ParallelRandomPassword Password8ParallelRandomPassword.cpp)
-add_executable(Password8Sequenziale Password8Sequenziale.cpp
-        Password8Sequenziale.cpp)
+add_executable(Password8ParallelRandomPasswordNOWAIT Password8ParallelRandomPasswordNOWAIT.cpp)
 
-target_link_libraries(provapass8 PRIVATE crypt)
-target_link_libraries(provapass8date PRIVATE crypt)
-target_link_libraries(provapass8sequenziale PRIVATE crypt)
-target_link_libraries(provapass8datesequenziale PRIVATE crypt)
-target_link_libraries(Password8ParallelProvaOPT PRIVATE crypt)
-target_link_libraries(Password8ParallelRandomPassword PRIVATE crypt)
-target_link_libraries(Password8Sequenziale PRIVATE crypt)
+add_executable(Password8Sequenziale Password8Sequenziale.cpp)
+
+# Link libraries per tutti gli executables
+set(ALL_TARGETS
+    Password8ParallelRandomPassword
+    Password8ParallelRandomPasswordNOWAIT
+    Password8Sequenziale
+)
+
+foreach(target ${ALL_TARGETS})
+    target_link_libraries(${target} PRIVATE crypt OpenMP::OpenMP_CXX)
+
+    # Abilita supporto OpenMP cancellation
+    if(OpenMP_CXX_FOUND)
+        target_compile_options(${target} PRIVATE ${OpenMP_CXX_FLAGS})
+    endif()
+endforeach()
+
+# Messaggio informativo sul build type
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Optimization flags: ${CMAKE_CXX_FLAGS_RELEASE}")
+endif()
